@@ -16,22 +16,20 @@ const App = () => {
   }, [seachValue]);
 
   const allCountries = countries.filter((countriesName) => {
-    return countriesName.name.common.toLowerCase().includes(seachValue);
+    return countriesName.name.common
+      .toLowerCase()
+      .includes(seachValue.toLowerCase());
   });
 
   useEffect(() => {
     const apiKey = "187062190f4345e494a724abe5c720b3";
 
-    console.log(city);
     axios
       .get(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&APPID=${apiKey}`
       )
       .then((response) => {
-        console.log(response.data.wind.speed);
         setTemperature(response);
-
-        // setTemp(response.main.temp);
       });
   }, [city]);
 
