@@ -2,20 +2,21 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
+// I know that using an index on a key is a bad choice, but in this case I allowed myself
+
 const App = () => {
-  const [countries, setCountries] = useState([]);
+  const [countriesData, setCountriesData] = useState([]);
   const [seachValue, setSearchValue] = useState("");
-  const [fleg, setFleg] = useState("");
   const [city, setCity] = useState("london");
-  const [temperature, setTemperature] = useState("");
+  const [weatherData, setWeatherData] = useState("");
 
   useEffect(() => {
     axios.get(`https://restcountries.com/v3.1/all`).then((response) => {
-      setCountries(response.data);
+      setCountriesData(response.data);
     });
   }, [seachValue]);
 
-  const allCountries = countries.filter((countriesName) => {
+  const allCountries = countriesData.filter((countriesName) => {
     return countriesName.name.common
       .toLowerCase()
       .includes(seachValue.toLowerCase());
@@ -29,13 +30,12 @@ const App = () => {
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&APPID=${apiKey}`
       )
       .then((response) => {
-        setTemperature(response);
+        setWeatherData(response);
       });
   }, [city]);
 
   useEffect(() => {
     if (allCountries.length === 1) {
-      setFleg(allCountries[0].flags.png);
       setCity(allCountries[0].capital[0]);
     }
   }, [allCountries]);
@@ -47,49 +47,49 @@ const App = () => {
         <input type="search" onChange={(e) => setSearchValue(e.target.value)} />
         <div>
           {seachValue
-            ? allCountries.map((item, index) => {
+            ? allCountries.map((infoCountries, index) => {
                 if (allCountries.length === 1) {
                   return (
                     <div key={index}>
-                      <h2>{item.name.common}</h2>
-                      <p style={{ fontWeight: "bold" }}>
-                        Capital: {item.capital[0]}
+                      <h2>{infoCountries.name.common}</h2>
+                      <p className="boldText">
+                        Capital: {infoCountries.capital[0]}
                       </p>
-                      <p style={{ fontWeight: "bold" }}>area: {item.area}</p>
-                      <div style={{ fontWeight: "bold" }}>
+                      <p className="boldText">area: {infoCountries.area}</p>
+                      <div className="boldText">
                         Language:
                         <ul>
-                          {Object.values(item.languages).map(
+                          {Object.values(infoCountries.languages).map(
                             (language, index) => {
                               return <li key={index}>{language}</li>;
                             }
                           )}
                         </ul>
-                        <img src={fleg} alt="icons" />
+                        <img src={allCountries[0].flags.png} alt="icons" />
                         <h1>Weather</h1>
                         <p>
                           Temperature{" "}
                           {(
-                            ((temperature.data.main.temp - 32) * 5) /
+                            ((weatherData.data.main.temp - 32) * 5) /
                             9
                           ).toFixed(1)}{" "}
                           Celsius
                         </p>
                         <img
-                          src={`http://openweathermap.org/img/w/${temperature.data.weather[0].icon}.png`}
+                          src={`http://openweathermap.org/img/w/${weatherData.data.weather[0].icon}.png`}
                           alt="weather icon"
                         />
-                        <p>Wind {temperature.data.wind.speed} m/s</p>
+                        <p>Wind {weatherData.data.wind.speed} m/s</p>
                       </div>
                     </div>
                   );
                 } else {
                   return (
                     <div key={index}>
-                      {item.name.common}
+                      {infoCountries.name.common}
                       <button
                         onClick={() => {
-                          setCountries([item]);
+                          setCountriesData([infoCountries]);
                         }}
                       >
                         Show
