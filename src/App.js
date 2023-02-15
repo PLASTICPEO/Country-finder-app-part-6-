@@ -6,21 +6,39 @@ const App = () => {
   const [countries, setCountries] = useState([]);
   const [seachValue, setSearchValue] = useState("");
   const [fleg, setFleg] = useState("");
+  const [city, setCity] = useState("london");
+  const [temperature, setTemperature] = useState("");
 
   useEffect(() => {
     axios.get(`https://restcountries.com/v3.1/all`).then((response) => {
       setCountries(response.data);
     });
-  }, []);
+  }, [seachValue]);
 
   const allCountries = countries.filter((countriesName) => {
     return countriesName.name.common.toLowerCase().includes(seachValue);
   });
 
   useEffect(() => {
+    const apiKey = "187062190f4345e494a724abe5c720b3";
+
+    console.log(city);
+    axios
+      .get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&APPID=${apiKey}`
+      )
+      .then((response) => {
+        console.log(response.data.wind.speed);
+        setTemperature(response);
+
+        // setTemp(response.main.temp);
+      });
+  }, [city]);
+
+  useEffect(() => {
     if (allCountries.length === 1) {
-      console.log(allCountries);
       setFleg(allCountries[0].flags.png);
+      setCity(allCountries[0].capital[0]);
     }
   }, [allCountries]);
 
@@ -50,15 +68,35 @@ const App = () => {
                           )}
                         </ul>
                         <img src={fleg} alt="icons" />
+                        <h1>Weather</h1>
+                        <p>
+                          Temperature{" "}
+                          {(
+                            ((temperature.data.main.temp - 32) * 5) /
+                            9
+                          ).toFixed(1)}{" "}
+                          Celsius
+                        </p>
+                        <img
+                          src={`http://openweathermap.org/img/w/${temperature.data.weather[0].icon}.png`}
+                          alt="weather icon"
+                        />
+                        <p>Wind {temperature.data.wind.speed} m/s</p>
                       </div>
                     </div>
                   );
                 } else {
                   return (
-                    <p key={index}>
+                    <div key={index}>
                       {item.name.common}
-                      <button>Show</button>
-                    </p>
+                      <button
+                        onClick={() => {
+                          setCountries([item]);
+                        }}
+                      >
+                        Show
+                      </button>
+                    </div>
                   );
                 }
               })
